@@ -1,0 +1,22 @@
+place_move 7 15
+pass
+place_move 2 2
+pass
+place_move 6 13
+place_move 4 14
+place_move 3 7
+place_move 16 9
+pass
+place_move 11 14
+pass
+pass
+place_move 15 12
+place_move 6 5
+place_move 4 3
+place_move 14 16
+place_move 5 12
+place_move 6 7
+place_move 6 10
+place_move 3 11
+place_move 6 4
+place_move 6 12

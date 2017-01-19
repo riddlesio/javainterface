@@ -1,0 +1,5 @@
+initialize
+configuration {"maxRounds":{"type":"integer","value":30},"fieldWidth":{"type":"integer","value":19},"fieldHeight":{"type":"integer","value":19},"komi":{"type":"double","value":7.5}}}
+start
+details
+game

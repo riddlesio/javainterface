@@ -1,0 +1,15 @@
+place_move 2,1
+place_move 2,1
+place_move 2,1
+place_move 2,1
+place_move 2,1
+place_move 2,1
+place_move 2,1
+place_move 2,1
+place_move 2,1
+place_move 2,1
+place_move 2,1
+place_move 2,1
+place_move 2,1
+place_move 2,1
+place_move 2,1

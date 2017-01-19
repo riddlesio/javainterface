@@ -1,0 +1,27 @@
+place_move 3,1
+place_move 4,2
+place_move 3,3
+place_move 2,2
+place_move 2,2
+place_move 4,1
+place_move 5,1
+place_move 5,2
+place_move 0,5
+place_move 1,5
+place_move 2,5
+place_move 3,5
+place_move 4,5
+place_move 5,5
+place_move 6,5
+place_move 6,4
+place_move 6,3
+
+place_move 1,2
+
+place_move 3,2
+
+place_move 4,3
+place_move 0,3
+
+place_move 2,3
+place_move 4,3
