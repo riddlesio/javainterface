@@ -1,15 +1,14 @@
 package io.riddles.go
 
-import io.riddles.javainterface.engine.AbstractEngine
-import io.riddles.javainterface.game.AbstractGameSerializer
-import io.riddles.javainterface.game.player.AbstractPlayer
+import io.riddles.javainterface.game.TestProcessor
+import io.riddles.javainterface.game.TestSerializer
 import io.riddles.javainterface.game.player.PlayerProvider
-import io.riddles.javainterface.game.processor.AbstractProcessor
-import io.riddles.javainterface.game.state.AbstractState
-import io.riddles.javainterface.io.BotIOHandler
+import io.riddles.javainterface.game.player.TestPlayer
+import io.riddles.javainterface.game.state.TestState
 import io.riddles.javainterface.io.FileIOHandler
+import io.riddles.javainterface.io.TestIOHandler
+import org.json.JSONArray
 import org.json.JSONObject
-import spock.lang.Ignore
 import spock.lang.Specification
 
 class javainterfaceTests extends Specification {
@@ -31,83 +30,31 @@ class javainterfaceTests extends Specification {
  *     For the full copyright and license information, please view the LICENSE
  *     file that was distributed with this source code.
  */
-/*
 
-    public class TestEngine extends AbstractEngine {
-
-        TestEngine(PlayerProvider<RockPaperScissorsPlayer> playerProvider, String wrapperInput) {
-            super(playerProvider, null);
-            this.ioHandler = new FileIOHandler(wrapperInput);
-        }
-
-    }
-
-    public class TestSerializer extends AbstractGameSerializer<AbstractProcessor,AbstractState> {
-
-        TestSerializer(PlayerProvider playerProvider) {
-            super(playerProvider);
-        }
-
-        public JSONObject getDefaultJSON(AbstractProcessor processor, AbstractState initialState) {
-            JSONObject game = new JSONObject();
-            game = addDefaultJSON(initialState, game, processor);
-        }
-
-        @Override
-        public String traverseToString(AbstractProcessor processor, AbstractState initialState) {
-            JSONObject game = new JSONObject();
-
-            game = addDefaultJSON(initialState, game, processor);
-            return game.toString();
-        }
-    }
-
-    public class TestPlayer extends AbstractPlayer {
-
-        public TestPlayer(int id) {
-            super(id);
-        }
-    }
-
-    public class TestIOHandler extends BotIOHandler {
-
-        public TestIOHandler(int botId) {
-            super(botId);
-        }
-        @Override
-        void sendMessage(String s) {
-            System.out.println(s);
-        }
-    }
-    */
-
-    //@Ignore
-    /*
     def "Test JSON addDefaultJSON output"() {
-        println("addDefaultJSON")
 
         setup:
-        PlayerProvider p = new PlayerProvider<AbstractPlayer>();
-        TestPlayer testPlayer1 = new TestPlayer(1);
-        TestPlayer testPlayer2 = new TestPlayer(2);
-        p.add(testPlayer1);
-        p.add(testPlayer2);
-        TestSerializer serializer = new TestSerializer(p);
-        String j = serializer.traverseToString();
+        PlayerProvider p = new PlayerProvider<TestPlayer>();
 
+        p.add(new TestPlayer(1));
+        p.add(new TestPlayer(2));
+
+        TestSerializer serializer = new TestSerializer(p);
+
+        String s = serializer.traverseToString(new TestProcessor(), new TestState());
+        JSONObject json = new JSONObject(s);
         expect:
 
-        j.get("settings") instanceof JSONObject;
-        j.get("settings").get('players') instanceof JSONObject;
-        j.get("settings").get('players').get('names') instanceof JSONArray;
-        j.get("settings").get('players').get('count') instanceof Integer;
-        j.get("score") instanceof Integer;
-        if (j.get("winner") != null) {
-            j.get("winner") instanceof Integer;
+
+        json.get("settings") instanceof JSONObject;
+        json.get("settings").get('players') instanceof JSONObject;
+        json.get("settings").get('players').get('names') instanceof JSONArray;
+        json.get("settings").get('players').get('count') instanceof Integer;
+        json.get("score") instanceof Integer;
+        if (json.get("winner") != null) {
+            json.get("winner") instanceof Integer;
         }
     }
-    */
-/*
 
     def "Test Player"() {
 
@@ -124,13 +71,10 @@ class javainterfaceTests extends Specification {
     def "Test PlayerProvider"() {
 
         setup:
-        PlayerProvider p = new PlayerProvider<AbstractPlayer>();
+        PlayerProvider p = new PlayerProvider<TestPlayer>();
 
-
-        TestPlayer testPlayer1 = new TestPlayer(1);
-        TestPlayer testPlayer2 = new TestPlayer(2);
-        p.add(testPlayer1);
-        p.add(testPlayer2);
+        p.add(new TestPlayer(1));
+        p.add(new TestPlayer(2));
 
         expect:
         p.getPlayerById(1).getId() == 1;
@@ -157,5 +101,4 @@ class javainterfaceTests extends Specification {
         then:
         1 * testIOHandler.sendMessage("settings test2 value")
     }
-*/
 }
