@@ -1,4 +1,4 @@
-package io.riddles.go
+package io.riddles.javainterface
 
 import io.riddles.javainterface.game.TestProcessor
 import io.riddles.javainterface.game.TestSerializer
@@ -31,7 +31,7 @@ class javainterfaceTests extends Specification {
  *     file that was distributed with this source code.
  */
 
-    def "Test JSON addDefaultJSON output"() {
+    def "JSON addDefaultJSON output"() {
 
         setup:
         PlayerProvider p = new PlayerProvider<TestPlayer>();
@@ -56,7 +56,7 @@ class javainterfaceTests extends Specification {
         }
     }
 
-    def "Test Player"() {
+    def "Player"() {
 
         setup:
         TestPlayer testPlayer1 = new TestPlayer(1);
@@ -68,7 +68,7 @@ class javainterfaceTests extends Specification {
         testPlayer1.getIoHandler() instanceof FileIOHandler;
     }
 
-    def "Test PlayerProvider"() {
+    def "PlayerProvider"() {
 
         setup:
         PlayerProvider p = new PlayerProvider<TestPlayer>();
@@ -79,26 +79,7 @@ class javainterfaceTests extends Specification {
         expect:
         p.getPlayerById(1).getId() == 1;
         p.getPlayerById(2).getId() == 2;
-
     }
 
-    def "Test IOHandler"() {
 
-        setup:
-        TestPlayer testPlayer1 = new TestPlayer(1);
-        testPlayer1.setName("FooPlayer");
-
-        TestIOHandler testIOHandler = Mock();
-        testPlayer1.setIoHandler(testIOHandler);
-
-        when:
-        testPlayer1.sendSetting("test", 1);
-        then:
-        1 * testIOHandler.sendMessage("settings test 1")
-
-        when:
-        testPlayer1.sendSetting("test2", "value");
-        then:
-        1 * testIOHandler.sendMessage("settings test2 value")
-    }
 }
