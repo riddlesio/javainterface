@@ -3,11 +3,8 @@ package io.riddles.javainterface.engine
 import io.riddles.javainterface.configuration.CheckedConfiguration
 import io.riddles.javainterface.configuration.Configuration
 import io.riddles.javainterface.game.TestProcessor
-import io.riddles.javainterface.game.player.AbstractPlayer
 import io.riddles.javainterface.game.player.PlayerProvider
 import io.riddles.javainterface.game.player.TestPlayer
-import io.riddles.javainterface.game.processor.AbstractProcessor
-import io.riddles.javainterface.game.state.AbstractState
 import io.riddles.javainterface.game.state.TestState
 import io.riddles.javainterface.io.BotIO
 import io.riddles.javainterface.io.FileIOHandler

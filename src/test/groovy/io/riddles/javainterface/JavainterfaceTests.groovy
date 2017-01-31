@@ -1,4 +1,4 @@
-package io.riddles.go
+package io.riddles.javainterface
 
 import io.riddles.javainterface.game.TestProcessor
 import io.riddles.javainterface.game.TestSerializer

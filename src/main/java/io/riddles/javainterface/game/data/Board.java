@@ -1,5 +1,4 @@
 package io.riddles.javainterface.game.data;
-import io.riddles.javainterface.game.data.Point;
 
 
 /**

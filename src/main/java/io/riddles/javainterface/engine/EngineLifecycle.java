@@ -1,7 +1,6 @@
 package io.riddles.javainterface.engine;
 
 import io.riddles.javainterface.exception.TerminalException;
-import io.riddles.javainterface.game.state.AbstractState;
 
 /**
  * Created by joost on 1/3/17.

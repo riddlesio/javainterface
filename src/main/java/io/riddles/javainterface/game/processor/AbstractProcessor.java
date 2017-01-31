@@ -20,7 +20,6 @@
 package io.riddles.javainterface.game.processor;
 
 import io.riddles.javainterface.game.player.AbstractPlayer;
-import io.riddles.javainterface.game.player.PlayerBound;
 import io.riddles.javainterface.game.state.AbstractState;
 
 /**
