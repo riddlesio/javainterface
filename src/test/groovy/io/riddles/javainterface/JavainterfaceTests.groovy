@@ -11,7 +11,7 @@ import org.json.JSONArray
 import org.json.JSONObject
 import spock.lang.Specification
 
-class javainterfaceTests extends Specification {
+class JavainterfaceTests extends Specification {
 /*
  * Copyright 2016 riddles.io (developers@riddles.io)
  *

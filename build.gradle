@@ -1,24 +1,47 @@
-group 'io.riddles'
-version '1.0.0'
+buildscript {
+    repositories {
+        maven {
+            url 'http://artifactory.dev.riddles.io/artifactory/plugins-release'
+            credentials {
+                username = "joost"
+                password = "5aT7UjyahqsUHBZx"
+            }
+        }
+
+    }
+    dependencies {
+        //Check for the latest version here: http://plugins.gradle.org/plugin/com.jfrog.artifactory
+        classpath "org.jfrog.buildinfo:build-info-extractor-gradle:4+"
+    }
+}
+
+plugins {
+    id "org.sonarqube" version "2.2"
+}
 
 apply plugin: 'groovy'
 apply plugin: 'java'
 apply plugin: 'application'
+apply plugin: 'jacoco'
+
+group 'io.riddles'
+version '1.0.0'
 
 sourceCompatibility = 1.8
 
 mainClassName = 'io.riddles.javainterface.engine.AbstractEngine'
 
+
 sourceSets {
     main {
         java {
-            srcDir 'src/java'
+            srcDir 'src/main/java'
         }
     }
 
     test {
         groovy {
-            srcDir 'test/groovy'
+            srcDir 'src/test/groovy'
         }
     }
 }
@@ -41,29 +64,12 @@ repositories {
 
 dependencies {
     compile group: 'org.json', name: 'json', version: '20160212'
-    compile group: 'com.amazonaws', name: 'aws-java-sdk', version: '1.7.13'
-    compile 'org.mongodb:mongo-java-driver:2.13.3'
+//    compile group: 'com.amazonaws', name: 'aws-java-sdk', version: '1.7.13'
+//    compile 'org.mongodb:mongo-java-driver:2.13.3'
     testCompile 'org.codehaus.groovy:groovy-all:2.4.1'
     testCompile "org.spockframework:spock-core:1.0-groovy-2.4"
     compile group: 'org.objenesis', name: 'objenesis', version: '1.2'
     testCompile group: 'cglib', name: 'cglib-nodep', version: '3.2.2'
-}
-
-buildscript {
-    repositories {
-        maven {
-            url 'http://artifactory.dev.riddles.io/artifactory/plugins-release'
-            credentials {
-                username = "joost"
-                password = "5aT7UjyahqsUHBZx"
-            }
-        }
-
-    }
-    dependencies {
-        //Check for the latest version here: http://plugins.gradle.org/plugin/com.jfrog.artifactory
-        classpath "org.jfrog.buildinfo:build-info-extractor-gradle:4+"
-    }
 }
 
 allprojects {
@@ -89,5 +95,27 @@ artifactory {
             maven = true
 
         }
+    }
+}
+
+jacoco {
+    toolVersion = "0.7.7.201606060606"
+}
+
+jacocoTestReport {
+    reports {
+        xml.enabled false
+        csv.enabled false
+        html.destination "${buildDir}/jacocoHtml"
+    }
+}
+
+sonarqube {
+    properties {
+        property "sonar.projectKey", "io.riddles:javainterface"
+        property "sonar.branch", "master"
+        property "sonar.projectName", "JavaInterface"
+        property "sonar.projectVersion", "1.0.0"
+        property "sonar.groovy.binaries", "build/jacoco/test.exec"
     }
 }
