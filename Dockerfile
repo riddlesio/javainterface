@@ -7,9 +7,9 @@ RUN mkdir /riddles && chown 999:999 /riddles
 
 COPY build.gradle /riddles/build.gradle
 WORKDIR /riddles
-RUN gradle installDist
 
-#USER jenkins
+USER jenkins
+RUN gradle installDist
 
 # docker create -v /.gradle --name persistent_gradle javainterface-build-environment /bin/true
 # docker run -v $(pwd):/riddles --volumes-from persistent_gradle javainterface-build-environment:latest bash -c "./gradlew test"
