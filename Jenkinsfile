@@ -4,20 +4,9 @@ node {
         stage 'Prepare Build Environment'
         checkout scm
 
-        def id_before = sh(script: /docker ps -a --format="{{.ID}} {{.Image}} {{.Names}} {{.Labels}}" | grep javainterface-build-environment | cut -d ' ' -f 2/, returnStdout: true).trim()
         def environment_image = docker.build('javainterface-build-environment')
-        def id_after = sh(script: /docker ps -a --format="{{.ID}} {{.Image}} {{.Names}} {{.Labels}}" | grep javainterface-build-environment | cut -d ' ' -f 2/, returnStdout: true).trim()
 
-        // create a persistent docker volume
-        def persistent_volume_image_id = sh(script: /docker ps -a --format="{{.ID}} {{.Image}} {{.Names}} {{.Labels}}" | grep persistent_gradle | cut -d ' ' -f 2/, returnStdout: true).trim()
-        if (id_before != id_after) {
-            sh("docker rm persistent_gradle || echo 0")
-        }
-        if (persistent_volume_image_id == '' || id_before != id_after) {
-            sh("docker create -v /.gradle --name persistent_gradle javainterface-build-environment /bin/true")
-        }
-
-        environment_image.inside("-v ${env.WORKSPACE}:/riddles --volumes-from persistent_gradle") {
+        environment_image.inside("-v ${env.WORKSPACE}:/riddles") {
             stage 'Test'
                 sh("gradle test")
 
