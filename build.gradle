@@ -16,14 +16,15 @@ buildscript {
 }
 
 plugins {
+    id "idea"
+    id "groovy"
+    id "java"
+    id "application"
+    id "jacoco"
     id "org.sonarqube" version "2.2"
 }
 
-apply plugin: 'groovy'
-apply plugin: 'java'
-apply plugin: 'application'
-apply plugin: 'jacoco'
-
+// TODO: move all variables to settings.gradle
 group 'io.riddles'
 version '1.0.0'
 
