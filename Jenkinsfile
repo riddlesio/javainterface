@@ -7,7 +7,7 @@ node {
         def environment_image = docker.build('javainterface-build-container')
 
         // create a persistent docker volume
-        def persistent_volume_image_id = sh(script: "docker ps -a --format=\"{{.ID}} {{.Image}} {{.Names}} {{.Labels}}\" | grep priceless_lovelace | cut -d ' ' -f 2'", returnStdout: true).trim()
+        def persistent_volume_image_id = sh(script: /docker ps -a --format="{{.ID}} {{.Image}} {{.Names}} {{.Labels}}" | grep priceless_lovelace | cut -d ' ' -f 2/, returnStdout: true).trim()
         if (persistent_volume_image_id == '' || persistent_volume_image_id != environment_image.id) {
             volume_container = environment_image.run('-v /.gradle --name persistent_gradle', '/bin/true')
             volume_container.stop()
