@@ -19,8 +19,8 @@ node {
             stage 'Test'
                 sh("gradle test")
 
-            stage 'Analyze source'
-                sh("gradle sonarqube")
+//            stage 'Analyze source'
+//                sh("gradle sonarqube")
 
             stage 'Build'
                 sh("gradle build")
