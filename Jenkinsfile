@@ -5,8 +5,13 @@ node {
         checkout scm
 
         def environment_image = docker.build('javainterface-build-container')
-        volume_container = environment_image.run('-v /.gradle --name persistent_gradle', '/bin/true')
-        volume_container.stop
+
+        // create a persistent docker volume once
+        def persistent_volume = sh(script: "sh -c 'docker ps -a | grep -o persistent_gradle'", returnStdout: true).trim()
+        if (persistent_volume != 'persistent_gradle') {
+            volume_container = environment_image.run('-v /.gradle --name persistent_gradle', '/bin/true')
+            volume_container.stop()
+        }
 
         environment_image.inside("-v ${env.WORKSPACE}:/riddles --volumes-from persistent_gradle") {
             stage 'Test'
