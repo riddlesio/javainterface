@@ -12,7 +12,7 @@ node {
 
             stage 'Analyze source'
             withSonarQubeEnv('SonarQube') {
-                sh("gradle sonarqube -Dsonar.branch=${env.BRANCH_NAME} -Dsonar.host.url=$SONAR_HOST_URL -Dsonar.login=$SONAR_AUTH_TOKEN")
+                sh("gradle sonarqube -i -Dsonar.branch=${env.BRANCH_NAME} -Dsonar.host.url=$SONAR_HOST_URL -Dsonar.login=$SONAR_AUTH_TOKEN")
             }
 
             stage 'Build'
