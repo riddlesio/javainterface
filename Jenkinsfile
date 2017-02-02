@@ -11,7 +11,9 @@ node {
                 sh("gradle test")
 
             stage 'Analyze source'
-                sh("gradle sonarqube -Dsonar.host.url=http://35.187.10.52:9000")
+            withSonarQubeEnv('SonarQube') {
+                sh("gradle sonarqube -Dsonar.branch=${env.BRANCH_NAME} -Dsonar.host.url=$SONAR_HOST_URL -Dsonar.login=$SONAR_AUTH_TOKEN")
+            }
 
             stage 'Build'
                 sh("gradle build")
