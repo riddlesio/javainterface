@@ -23,6 +23,8 @@ node {
               thresholds: [[$class: 'FailedThreshold', unstableThreshold: '1']],
               tools: [[$class: 'JUnitType', pattern: "**/build/test-results/*.xml"]]])
 
+        slackSend (color: '#00FF00', message: "SUCCESSFUL: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL}) for branch ${env.BRANCH_NAME}")
+
     } catch (e) {
         currentBuild.result = "FAILED"
         notifyFailed()
@@ -31,6 +33,7 @@ node {
 }
 
 def notifyFailed() {
+    slackSend (color: '#FF0000', message: "FAILED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL}) for branch ${env.BRANCH_NAME}")
     emailext (
             subject: "[BUILD_FAILED][${env.JOB_NAME}][${env.BUILD_NUMBER}]",
             mimeType: "text/html",
