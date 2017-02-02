@@ -4,6 +4,9 @@ node {
         stage 'Prepare Build Environment'
         checkout scm
 
+        def url
+        def sonarBasicAuth
+        def sonarServerUrl
         def environment_image = docker.build('javainterface-build-environment')
 
         environment_image.inside("-v ${env.WORKSPACE}:/riddles") {
@@ -13,6 +16,29 @@ node {
             stage 'Analyze source'
             withSonarQubeEnv('SonarQube') {
                 sh("gradle sonarqube -i -Dsonar.branch=${env.BRANCH_NAME} -Dsonar.host.url=$SONAR_HOST_URL -Dsonar.login=$SONAR_AUTH_TOKEN")
+                def props = getProperties("target/sonar/report-task.txt")
+                sonarServerUrl=props.getProperty('serverUrl')
+                url = new URL(props.getProperty('ceTaskUrl'))
+                sonarBasicAuth  = SONAR_AUTH_TOKEN + ":"
+                sonarBasicAuth = sonarBasicAuth.getBytes().encodeBase64().toString()
+            }
+
+            stage("Quality Gate") {
+                def ceTask
+                timeout(time: 1, unit: 'MINUTES') {
+                    waitUntil {
+                        ceTask = jsonParse(url, sonarBasicAuth)
+                        echo ceTask.toString()
+                        return "SUCCESS".equals(ceTask["task"]["status"])
+                    }
+                }
+                url = new URL(sonarServerUrl + "/api/qualitygates/project_status?analysisId=" + ceTask["task"]["analysisId"])
+                def qualitygate = jsonParse(url, sonarBasicAuth)
+                echo qualitygate.toString()
+                if ("ERROR".equals(qualitygate["projectStatus"]["status"])) {
+                    error "Quality Gate Failure"
+                }
+                echo "Quality Gate Success"
             }
 
             stage 'Build'
@@ -42,4 +68,29 @@ def notifyFailed() {
             recipientProviders: [[$class: 'DevelopersRecipientProvider']]
     )
 }
+
+// https://gist.github.com/vdupain/832964527b4b8d7d4c648169dae8c656
+
+def Properties getProperties(filename) {
+    def properties = new Properties()
+    properties.load(new StringReader(readFile(filename)))
+    return properties
+}
+
+
+@NonCPS
+def jsonParse(text) {
+    return new groovy.json.JsonSlurperClassic().parseText(text);
+}
+
+@NonCPS
+def jsonParse(URL url, String basicAuth) {
+    def conn = url.openConnection()
+    conn.setRequestProperty( "Authorization", "Basic " + basicAuth )
+    InputStream is = conn.getInputStream();
+    def json = new groovy.json.JsonSlurperClassic().parseText(is.text);
+    conn.disconnect();
+    return json
+}
+
 // vim: set syntax=groovy cindent ts=2 sts=2 sw=2:
