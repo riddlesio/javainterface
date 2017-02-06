@@ -110,15 +110,6 @@ public class FileIOHandler implements BotIO, IO {
     }
 
     /**
-     * Send a message that will be received by all bots,
-     * no response from bots is expected
-     * @param message Message to send
-     */
-    public void broadcastMessage(String message) {
-        sendMessage(String.format("bot all send %s", message));
-    }
-
-    /**
      * Get next message from given file
      * @return The next line in the file
      * @throws IOException
@@ -128,23 +119,6 @@ public class FileIOHandler implements BotIO, IO {
 
         if (line != null) {
             LOGGER.info(line);
-            return line;
-        }
-
-        throw new IOException("No more input.");
-    }
-
-    /**
-     * Get next message from game wrapper
-     * @return The received message
-     * @throws IOException
-     */
-    private String getNextMessageFromInStream() throws IOException {
-        if (this.scanner.hasNextLine()) {
-            String line = "";
-            while (line.length() == 0) {
-                line = this.scanner.nextLine().trim();
-            }
             return line;
         }
 

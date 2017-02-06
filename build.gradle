@@ -1,13 +1,12 @@
 group 'io.riddles'
-version '1.0.0'
+version '1.0.2'
 
 apply plugin: 'groovy'
 apply plugin: 'java'
 apply plugin: 'application'
+apply plugin: "jacoco"
 
 sourceCompatibility = 1.8
-
-mainClassName = 'io.riddles.javainterface.engine.AbstractEngine'
 
 sourceSets {
     main {
@@ -23,11 +22,19 @@ sourceSets {
     }
 }
 
+jacocoTestReport {
+    reports {
+        xml.enabled false
+        csv.enabled false
+        html.destination "${buildDir}/jacocoHtml"
+    }
+}
+
+
 jar {
     manifest {
         attributes 'Implementation-Title': 'Riddles.io javainterface',
-                'Implementation-Version': version,
-                'mainClassName': mainClassName
+                'Implementation-Version': version
     }
 
     from {
