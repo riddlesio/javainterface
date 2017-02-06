@@ -39,7 +39,7 @@ import io.riddles.javainterface.game.state.AbstractState;
  */
 public abstract class AbstractGameSerializer<P extends AbstractProcessor, S extends AbstractState> {
 
-    PlayerProvider playerProvider;
+    protected PlayerProvider playerProvider;
 
     public AbstractGameSerializer( PlayerProvider playerProvider ) {
         this.playerProvider = playerProvider;
