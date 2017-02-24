@@ -20,7 +20,6 @@
 package io.riddles.javainterface.engine;
 
 import io.riddles.javainterface.game.player.AbstractPlayer;
-import io.riddles.javainterface.game.player.PlayerProvider;
 import io.riddles.javainterface.game.processor.AbstractProcessor;
 import io.riddles.javainterface.game.state.AbstractState;
 
@@ -34,7 +33,7 @@ import io.riddles.javainterface.game.state.AbstractState;
  *
  * @author Jim van Eeden - jim@riddles.io
  */
-public interface GameLoop<ProcessorType extends AbstractProcessor<AbstractPlayer, AbstractState>> {
+public interface GameLoopInterface<Pr extends AbstractProcessor<AbstractState, AbstractPlayer>> {
 
-    AbstractState run(AbstractState initialState, ProcessorType processor);
+    AbstractState run(AbstractState initialState, Pr processor);
 }

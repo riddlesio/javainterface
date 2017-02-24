@@ -1,10 +1,29 @@
+/*
+ * Copyright 2016 riddles.io (developers@riddles.io)
+ *
+ *     Licensed under the Apache License, Version 2.0 (the "License");
+ *     you may not use this file except in compliance with the License.
+ *     You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *     Unless required by applicable law or agreed to in writing, software
+ *     distributed under the License is distributed on an "AS IS" BASIS,
+ *     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *     See the License for the specific language governing permissions and
+ *     limitations under the License.
+ *
+ *     For the full copyright and license information, please view the LICENSE
+ *     file that was distributed with this source code.
+ */
+
 package io.riddles.javainterface.engine;
 
 import io.riddles.javainterface.game.player.AbstractPlayer;
-import io.riddles.javainterface.game.player.PlayerBound;
 import io.riddles.javainterface.game.player.PlayerProvider;
 import io.riddles.javainterface.game.processor.AbstractProcessor;
 import io.riddles.javainterface.game.processor.PlayerResponseProcessor;
+import io.riddles.javainterface.game.state.AbstractPlayerState;
 import io.riddles.javainterface.game.state.AbstractState;
 import io.riddles.javainterface.io.PlayerResponse;
 
@@ -12,29 +31,24 @@ import java.util.ArrayList;
 import java.util.logging.Logger;
 
 /**
- * Created by joost on 12/5/16.
+ * io.riddles.javainterface.engine.SimpleGameLoop - Created on 5-12-16
+ *
+ * [description]
+ *
+ * @author Joost de Meij - joost@riddles.io, Jim van Eeden - jim@riddles.io
  */
-public class TurnBasedGameLoop implements GameLoop<PlayerResponseProcessor<AbstractPlayer, AbstractState>> {
-    protected final static Logger LOGGER = Logger.getLogger(AbstractProcessor.class.getName());
-    private PlayerProvider<AbstractPlayer> playerProvider;
-    int maxRounds = 15; /* TODO */
+public class TurnBasedGameLoop implements GameLoopInterface<PlayerResponseProcessor<AbstractState, AbstractPlayer>> {
 
-    public TurnBasedGameLoop(PlayerProvider playerProvider) {
-        this.playerProvider = playerProvider;
-    }
+    private final static Logger LOGGER = Logger.getLogger(AbstractProcessor.class.getName());
 
     @Override
     public AbstractState run(AbstractState initialState,
-                             PlayerResponseProcessor<AbstractPlayer, AbstractState> processor) {
-
+                             PlayerResponseProcessor<AbstractState, AbstractPlayer> processor) {
         AbstractState state = initialState;
         int roundNumber = 0;
 
-
-        while (state != null && !processor.hasGameEnded(state) && roundNumber <= maxRounds) {
-
+        while (state != null && !processor.hasGameEnded(state)) {
             roundNumber++;
-
             state = playRound(processor, roundNumber, state);
 
             if (state == null) {
@@ -45,31 +59,30 @@ public class TurnBasedGameLoop implements GameLoop<PlayerResponseProcessor<Abstr
         return state;
     }
 
-    private AbstractState playRound(PlayerResponseProcessor<AbstractPlayer, AbstractState> processor, int roundNumber, AbstractState state) {
+    private AbstractState playRound(
+            PlayerResponseProcessor<AbstractState, AbstractPlayer> processor,
+            int roundNumber,
+            AbstractState state) {
         LOGGER.info(String.format("Playing round %d", roundNumber));
 
-        ArrayList<PlayerBound> playerStates = state.getPlayerStates();
+        ArrayList<AbstractPlayerState> playerStates = state.getPlayerStates();
 
         return playerStates.stream()
-            .reduce(state,
-                    (AbstractState intermediateState, PlayerBound playerState) -> {
+            .reduce(state, (AbstractState intermediateState, AbstractPlayerState playerState) -> {
+                if (processor.hasGameEnded(intermediateState)) {
+                    return intermediateState;
+                }
 
-                        if (processor.hasGameEnded(intermediateState)) {
-                            return intermediateState;
-                        }
+                int playerId = playerState.getPlayerId();
+                AbstractPlayer player = processor.getPlayerProvider().getPlayerById(playerId);
 
-                        AbstractPlayer player = playerProvider.getPlayerById(playerState.getPlayerId());
+                processor.sendUpdates(intermediateState, player);
+                Enum actionType = processor.getActionType(intermediateState, playerState);
+                String response = player.requestMove(actionType);
 
-                        processor.sendUpdates(intermediateState, player);
-
-                        Enum actionType = processor.getActionRequest(intermediateState, playerState);
-
-                        String response = player.requestMove(actionType);
-
-                        return processor.processInput(intermediateState, roundNumber, new PlayerResponse(response, player.getId()));
-                    },
-                    (inputState, outputState) -> outputState);
+                return processor.createNextStateFromResponse(
+                        intermediateState, new PlayerResponse(response, playerId), roundNumber);
+            }, (inputState, outputState) -> outputState);
     }
-
 }
 

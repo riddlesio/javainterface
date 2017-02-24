@@ -22,7 +22,6 @@ package io.riddles.javainterface.engine;
 import java.util.logging.Logger;
 
 import io.riddles.javainterface.game.player.AbstractPlayer;
-import io.riddles.javainterface.game.processor.AbstractProcessor;
 import io.riddles.javainterface.game.processor.SimpleProcessor;
 import io.riddles.javainterface.game.state.AbstractState;
 
@@ -39,7 +38,7 @@ import io.riddles.javainterface.game.state.AbstractState;
  *
  * @author Jim van Eeden - jim@riddles.io
  */
-public class SimpleGameLoop implements GameLoop<SimpleProcessor<AbstractPlayer, AbstractState>> {
+public class SimpleGameLoop implements GameLoopInterface<SimpleProcessor<AbstractState, AbstractPlayer>> {
 
     protected final static Logger LOGGER = Logger.getLogger(SimpleGameLoop.class.getName());
 
@@ -53,7 +52,7 @@ public class SimpleGameLoop implements GameLoop<SimpleProcessor<AbstractPlayer, 
 
             roundNumber++;
 
-            state = processor.processInput(state, roundNumber);
+            state = processor.createNextState(state, roundNumber);
 
             if (state == null) {
                 LOGGER.severe("Processor has returned a null state");

@@ -34,36 +34,35 @@ import java.util.ArrayList;
  *
  * @author Jim van Eeden - jim@riddles.io
  */
-public abstract class AbstractState<S> {
+public abstract class AbstractState<Ps extends AbstractPlayerState> {
 
     private AbstractState previousState;
     private AbstractState nextState;
     private int roundNumber;
 
-    protected ArrayList<S> playerStates;
-
-    public AbstractState() {
-        this.previousState = null;
-        this.nextState = null;
-        this.roundNumber = -1;
-        this.playerStates = new ArrayList<>();
-    }
+    protected ArrayList<Ps> playerStates;
 
     // If a single state contains multiple moves (different players move at the same time)
-    public AbstractState(AbstractState previousState, ArrayList<S> playerStates, int roundNumber) {
+    public AbstractState(AbstractState previousState, ArrayList<Ps> playerStates, int roundNumber) {
         this.previousState = previousState;
-        this.previousState.nextState = this;
         this.roundNumber = roundNumber;
         this.playerStates = playerStates;
+
+        if (previousState != null) {
+            this.previousState.nextState = this;
+        }
     }
 
     // If a single state contains only one move (players move in turn)
-    public AbstractState(AbstractState previousState, S playerState, int roundNumber) {
+    public AbstractState(AbstractState previousState, Ps playerState, int roundNumber) {
         this.previousState = previousState;
-        this.previousState.nextState = this;
         this.roundNumber = roundNumber;
         this.playerStates = new ArrayList<>();
         this.playerStates.add(playerState);
+
+        if (previousState != null) {
+            this.previousState.nextState = this;
+        }
     }
 
     /**
@@ -90,8 +89,22 @@ public abstract class AbstractState<S> {
     /**
      * @return The playerStates in this state
      */
-    public ArrayList<S> getPlayerStates() {
+    public ArrayList<Ps> getPlayerStates() {
         return this.playerStates;
+    }
+
+    /**
+     * @param playerId Player id
+     * @return The player state for player of given id
+     */
+    public Ps getPlayerStateById(int playerId) {
+        for (Ps playerState : this.playerStates) {
+            if (playerState.getPlayerId() == playerId) {
+                return playerState;
+            }
+        }
+
+        throw new RuntimeException(String.format("PlayerState with id %d not found", playerId));
     }
 
     /**
@@ -112,8 +125,7 @@ public abstract class AbstractState<S> {
         this.roundNumber = roundNumber;
     }
 
-
-
-    public void setPlayerstates( ArrayList<S> playerStates) { this.playerStates = playerStates; }
-
+    public void setPlayerstates(ArrayList<Ps> playerStates) {
+        this.playerStates = playerStates;
+    }
 }

@@ -20,7 +20,7 @@
 package io.riddles.javainterface.game.player;
 
 import io.riddles.javainterface.io.BotIOHandler;
-import io.riddles.javainterface.io.BotIO;
+import io.riddles.javainterface.io.BotIOInterface;
 
 /**
  * io.riddles.javainterface.engine.player.AbstractPlayer - Created on 2-6-16
@@ -37,7 +37,7 @@ public abstract class AbstractPlayer {
 
     private String name;
     private int id;
-    protected BotIO ioHandler;
+    protected BotIOInterface ioHandler;
 
     public AbstractPlayer(int id) {
         this.id = id;
@@ -45,7 +45,7 @@ public abstract class AbstractPlayer {
         this.ioHandler = new BotIOHandler(id);
     }
 
-    public void setIoHandler(BotIO iohandler) {
+    public void setIoHandler(BotIOInterface iohandler) {
         this.ioHandler = iohandler;
     }
 
@@ -71,7 +71,7 @@ public abstract class AbstractPlayer {
      */
     public void setName(String name) { this.name = name; }
 
-    public BotIO getIoHandler() {
+    public BotIOInterface getIoHandler() {
         return this.ioHandler;
     }
 

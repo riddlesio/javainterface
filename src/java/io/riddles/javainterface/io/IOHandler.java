@@ -20,12 +20,7 @@
 package io.riddles.javainterface.io;
 
 import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.Charset;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -40,7 +35,7 @@ import java.util.logging.Logger;
  *
  * @author Jim van Eeden - jim@riddles.io
  */
-public class IOHandler implements IO {
+public class IOHandler implements IOInterface {
 
     protected final static Logger LOGGER = Logger.getLogger(IOHandler.class.getName());
     private Scanner scanner;
@@ -50,8 +45,6 @@ public class IOHandler implements IO {
         this.scanner = new Scanner(System.in);
     }
 
-
-
     /**
      * Get next line from one of the two input streams
      * @return The next line
@@ -59,8 +52,9 @@ public class IOHandler implements IO {
      */
     @Override
     public String getNextMessage() throws IOException {
-        if (this.reader != null)
+        if (this.reader != null) {
             return getNextMessageFromFile();
+        }
 
         return getNextMessageFromInStream();
     }
@@ -107,10 +101,10 @@ public class IOHandler implements IO {
     /**
      * Get next message from given file
      * @return The next line in the file
-     * @throws IOException
+     * @throws IOException Exception
      */
     private String getNextMessageFromFile() throws IOException {
-        String line = reader.readLine();
+        String line = this.reader.readLine();
 
         if (line != null) {
             LOGGER.info(line);
@@ -123,7 +117,7 @@ public class IOHandler implements IO {
     /**
      * Get next message from game wrapper
      * @return The received message
-     * @throws IOException
+     * @throws IOException Exception
      */
     private String getNextMessageFromInStream() throws IOException {
         if (this.scanner.hasNextLine()) {

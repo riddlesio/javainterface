@@ -19,7 +19,6 @@
 
 package io.riddles.javainterface.game;
 
-import io.riddles.javainterface.game.player.PlayerProvider;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -38,12 +37,6 @@ import io.riddles.javainterface.game.state.AbstractState;
  * @author Jim van Eeden - jim@riddles.io
  */
 public abstract class AbstractGameSerializer<P extends AbstractProcessor, S extends AbstractState> {
-
-    protected PlayerProvider playerProvider;
-
-    public AbstractGameSerializer( PlayerProvider playerProvider ) {
-        this.playerProvider = playerProvider;
-    }
 
     /**
      * Should return the complete game in a json string
@@ -64,13 +57,13 @@ public abstract class AbstractGameSerializer<P extends AbstractProcessor, S exte
 
         // put default settings (player settings)
         JSONArray playerNames = new JSONArray();
-        for (Object obj : playerProvider.getPlayers()) {
+        for (Object obj : processor.getPlayerProvider().getPlayers()) {
             AbstractPlayer player = (AbstractPlayer) obj;
             playerNames.put(player.getName());
         }
 
         JSONObject players = new JSONObject();
-        players.put("count", playerProvider.getPlayers().size());
+        players.put("count", processor.getPlayerProvider().getPlayers().size());
         players.put("names", playerNames);
 
         JSONObject settings = new JSONObject();

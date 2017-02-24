@@ -50,8 +50,6 @@ public abstract class AbstractMove {
         return this.invalidException != null;
     }
 
-
-
     /**
      * Sets the Exception of this move. Only set this if the Move is invalid.
      * @param exception exception
@@ -59,7 +57,6 @@ public abstract class AbstractMove {
     public void setException(Exception exception) {
         this.invalidException = exception;
     }
-
 
     /**
      * @return The exception of this move

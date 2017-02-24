@@ -21,7 +21,6 @@ package io.riddles.javainterface.io;
 
 import java.io.*;
 import java.nio.charset.Charset;
-import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -35,16 +34,13 @@ import java.util.logging.Logger;
  *
  * @author Jim van Eeden - jim@riddles.io
  */
-public class FileIOHandler implements BotIO, IO {
-
+public class FileIOHandler extends IOHandler implements BotIOInterface {
     protected final static Logger LOGGER = Logger.getLogger(FileIOHandler.class.getName());
-    private Scanner scanner;
     protected BufferedReader reader;
 
     // used for debugging only
     public FileIOHandler(String inputFile) {
         try {
-            System.out.println(inputFile);
             InputStream fis = new FileInputStream(inputFile);
             InputStreamReader isr = new InputStreamReader(fis, Charset.forName("UTF-8"));
             this.reader = new BufferedReader(isr);
@@ -60,30 +56,10 @@ public class FileIOHandler implements BotIO, IO {
      */
     @Override
     public String getNextMessage() throws IOException {
-        if (this.reader != null)
+        if (this.reader != null) {
             return getNextMessageFromFile();
-        throw new IOException("Reader is null.");
-    }
-
-    /**
-     * Waits until expected message is read, all
-     * messages received while waiting for expected message
-     * are ignored.
-     * @param expected Message that is waited on
-     */
-    @Override
-    public void waitForMessage(String expected) {
-        String message = null;
-
-        while (!expected.equals(message)) {
-            try {
-                message = getNextMessage();
-                try { Thread.sleep(2); } catch (InterruptedException ignored) {}
-            } catch (IOException ex) {
-                LOGGER.log(Level.SEVERE, ex.toString(), ex);
-                break;
-            }
         }
+        throw new IOException("Reader is null.");
     }
 
     /**
@@ -106,13 +82,13 @@ public class FileIOHandler implements BotIO, IO {
 
     @Override
     public void sendWarning(String warning) {
-
+        System.out.println("Warning: " + warning);
     }
 
     /**
      * Get next message from given file
      * @return The next line in the file
-     * @throws IOException
+     * @throws IOException Exception
      */
     private String getNextMessageFromFile() throws IOException {
         String line = reader.readLine();

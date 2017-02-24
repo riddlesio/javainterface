@@ -4,47 +4,57 @@ package io.riddles.javainterface.game.player;
 import java.util.ArrayList;
 
 /**
- * Created by joost on 12/12/16.
+ * io.riddles.javainterface.engine.player.PlayerBound - Created on 12-12-16
+ *
+ * [description]
+ *
+ * @author Joost de Meij - joost@riddles.io, Jim van Eeden - jim@riddles.io
  */
-public class PlayerProvider<Pl extends AbstractPlayer> {
-    protected ArrayList<Pl> players;
+public class PlayerProvider<P extends AbstractPlayer> {
 
+    protected ArrayList<P> players;
 
     public PlayerProvider() {
-        this.players = new ArrayList<Pl>();
-
+        this.players = new ArrayList<>();
     }
 
-
-    public Pl getPlayerById(int playerId) {
-        for (Pl player : this.players) {
-            if (player.getId() == playerId) return player;
+    public P getPlayerById(int playerId) {
+        for (P player : this.players) {
+            if (player.getId() == playerId) {
+                return player;
+            }
         }
-        return null;
+
+        throw new RuntimeException(String.format("Player with id %d not found", playerId));
     }
 
-    public ArrayList<Pl> getPlayers() {
+    public ArrayList<P> getPlayers() {
         return this.players;
     }
 
-    public void add(Pl player) {
+    public void add(P player) {
         this.players.add(player);
     }
 
-
     /**
-     * When this.players's size == 2, it will find the other player than 'p'.
-     * If this.player's size != 2, it will return null.
-     *
-     * @param AbstractPlayer The player to find the opponent for.
-     * @return The AbstractPlayer of the opponent player, or null if no opponent can be determined.
+     * When this.players's size == 2 the opponent player will be returned,
+     * otherwise, an error will be thrown.
+     * @param player The player to find the opponent for.
+     * @return The AbstractPlayer of the opponent player
      */
-    private Pl getOpponentPlayer(Pl p) {
-        if (this.players.size() == 2) {
-            for (Pl player : this.players) {
-                if (player.getId() != p.getId()) return player;
+    private P getOpponentPlayer(P player) {
+        if (this.players.size() != 2) {
+            throw new RuntimeException(String.format("getOpponentPlayer only possible if amount " +
+                    "if players is 2, there are %d players in this game", this.players.size()));
+        }
+
+        for (P other : this.players) {
+            if (player.getId() != other.getId()) {
+                return other;
             }
         }
-        return null;
+
+        throw new RuntimeException(
+                String.format("Opponent player can't be found for player id %s", player.getId()));
     }
 }

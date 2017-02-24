@@ -19,18 +19,14 @@
 
 package io.riddles.javainterface.engine;
 
-import io.riddles.javainterface.configuration.CheckedConfiguration;
 import io.riddles.javainterface.configuration.Configuration;
-import io.riddles.javainterface.exception.ConfigurationException;
 import io.riddles.javainterface.exception.TerminalException;
 
 import io.riddles.javainterface.game.player.PlayerProvider;
-import io.riddles.javainterface.io.BotIO;
-import io.riddles.javainterface.io.BotIOHandler;
+
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Logger;
@@ -38,7 +34,7 @@ import java.util.logging.Logger;
 import io.riddles.javainterface.game.player.AbstractPlayer;
 import io.riddles.javainterface.game.processor.AbstractProcessor;
 import io.riddles.javainterface.game.state.AbstractState;
-import io.riddles.javainterface.io.IO;
+import io.riddles.javainterface.io.IOInterface;
 
 /**
  * io.riddles.javainterface.engine.AbstractEngine - Created on 2-6-16
@@ -55,25 +51,23 @@ import io.riddles.javainterface.io.IO;
  * @author Jim van Eeden - jim@riddles.io
  */
 public abstract class AbstractEngine<Pr extends AbstractProcessor,
-        Pl extends AbstractPlayer, S extends AbstractState> {//} implements EngineLifecycle {
+        Pl extends AbstractPlayer, S extends AbstractState> {
 
     protected final static Logger LOGGER = Logger.getLogger(AbstractEngine.class.getName());
 
-    protected IO ioHandler;
+    public static Configuration configuration;
+
+    protected IOInterface ioHandler;
     protected PlayerProvider<Pl> playerProvider;
-
     protected Pr processor;
+    protected GameLoopInterface gameLoop;
 
-    protected GameLoop gameLoop;
-
-    protected AbstractEngine(PlayerProvider<Pl> playerProvider, IO ioHandler ) throws TerminalException {
+    protected AbstractEngine(PlayerProvider<Pl> playerProvider, IOInterface ioHandler) throws TerminalException {
         this.playerProvider = playerProvider;
         this.gameLoop = createGameLoop();
 
         this.ioHandler = ioHandler;
     }
-
-
 
     /**
      * Does everything needed before the game can start, such as
@@ -87,72 +81,18 @@ public abstract class AbstractEngine<Pr extends AbstractProcessor,
         this.ioHandler.sendMessage("ok");
 
         LOGGER.info("Got initialize. Parsing settings...");
-        CheckedConfiguration configuration = getConfiguration();
-        parseInputUntilStart(configuration);
-        if (!configuration.isComplete()) {
-            throw new ConfigurationException("Configuration incomplete.");
-        }
+        configuration = getDefaultConfiguration();
+        parseInputUntilStart();
 
         this.processor = createProcessor();
 
         LOGGER.info("Got start. Sending game settings to bots...");
 
-        sendConfigurationToPlayers(this.playerProvider.getPlayers(), configuration);
+        sendSettingsToPlayers(this.playerProvider.getPlayers());
         LOGGER.info("Settings sent. Setting up engine done...");
 
-        return getInitialState(configuration);
+        return getInitialState();
 
-    }
-
-    protected void parseInputUntilStart(Configuration configuration) throws TerminalException {
-        InputParser parser = new InputParser();
-        try {
-            ParseResult p;
-            String line = "";
-            p = parser.parse(line);
-            while (p.getType() != InputType.START) { // from "start", setup is done
-                line = this.ioHandler.getNextMessage();
-                p = parser.parse(line);
-                switch (p.getType()) {
-                    case BOT_IDS:
-                        for(Integer bot_id : (ArrayList<Integer>)p.getValue()) {
-                            Pl player = createPlayer(bot_id, new BotIOHandler(bot_id));
-                            this.playerProvider.add(player);
-                        }
-                        break;
-                    case CONFIGURATION:
-                        JSONObject config = (JSONObject)p.getValue();
-                        Iterator<String> keys = config.keys();
-                        while (keys.hasNext()) {
-                            String key = keys.next();
-                            JSONObject configValue = (config.getJSONObject(key));
-                            configuration.put(key, configValue);
-                        }
-                        break;
-                }
-            }
-        } catch (IOException ex) {
-            throw new TerminalException(ex.getMessage());
-        }
-    }
-
-    /**
-     * Send the settings to the player (bot) that are specific to this game
-     *
-     * @param player Player to send the configuration to
-     * @param configuration Configuration to send
-
-     */
-    protected abstract void sendConfigurationToPlayer(Pl player, Configuration configuration);
-    /**
-     * Send the settings to the player (bot) that are specific to this game
-     *
-     * @param List<Pl> players to send the settings to
-     * @param configuration Configuration to send
-     */
-
-    protected void sendConfigurationToPlayers(List<Pl> players, Configuration configuration) {
-        players.forEach(p -> this.sendConfigurationToPlayer(p, configuration));
     }
 
     /**
@@ -171,14 +111,64 @@ public abstract class AbstractEngine<Pr extends AbstractProcessor,
         return initialState;
     }
 
+    /**
+     * Handles everything that needs to happen after the game is done
+     * @param finalState Last state of the game
+     */
     public void didRun(S finalState) {
-
         // let the wrapper know the game has ended
         this.ioHandler.sendMessage("end");
 
         // send game details
         this.ioHandler.waitForMessage("details");
 
+        String details = getDetails(finalState);
+        this.ioHandler.sendMessage(details);
+
+        // send the game file
+        this.ioHandler.waitForMessage("game");
+
+        String playedGame = getPlayedGame(finalState);
+        this.ioHandler.sendMessage(playedGame);
+    }
+
+    protected void parseInputUntilStart() throws TerminalException {
+        InputType type = InputType.EMPTY;
+
+        try {
+            while (type != InputType.START) {
+                String line = this.ioHandler.getNextMessage();
+                String[] split = line.split(" ");
+                type = InputType.fromString(split[0]);
+
+                switch (type) {
+                    case BOT_IDS:
+                        String[] ids = split[1].split(",");
+                        for (String idString : ids) {
+                            int id = Integer.parseInt(idString);
+
+                            Pl player = createPlayer(id);
+                            this.playerProvider.add(player);
+                        }
+                        break;
+                    case CONFIGURATION:
+                        JSONObject config = new JSONObject(split[1].trim());
+                        Iterator<String> keys = config.keys();
+
+                        while (keys.hasNext()) {
+                            String key = keys.next();
+                            JSONObject configValue = config.getJSONObject(key);
+                            configuration.put(key, configValue);
+                        }
+                        break;
+                }
+            }
+        } catch (IOException ex) {
+            throw new TerminalException("Failed to parse configuration");
+        }
+    }
+
+    private String getDetails(S finalState) {
         Integer winner = this.processor.getWinnerId(finalState);
         String winnerId = "null";
 
@@ -190,58 +180,58 @@ public abstract class AbstractEngine<Pr extends AbstractProcessor,
         details.put("winner", winnerId);
         details.put("score", this.processor.getScore(finalState));
 
-        this.ioHandler.sendMessage(details.toString());
+        return details.toString();
+    }
 
-        // send the game file
-        this.ioHandler.waitForMessage("game");
-
-        String playedGame = getPlayedGame(finalState);
-        this.ioHandler.sendMessage(playedGame);
+    /**
+     * Send the settings to the player (bot) that are specific to this game
+     * @param players Players to send the settings to
+     */
+    private void sendSettingsToPlayers(List<Pl> players) {
+        players.forEach(this::sendSettingsToPlayer);
     }
 
     /**
      * Implement this to create a CheckedConfiguration for the app.
-     *
      * @return The CheckedConfiguration of the game
      */
-    protected abstract CheckedConfiguration getConfiguration();
-
-    /**
-     * Implement this to return the initial (mostly empty) game state.
-     * @param Configuration configuration
-     * @return The initial state of the game, should be Subclass of AbstractState
-     */
-    protected abstract S getInitialState(Configuration configuration);
-
-    /**
-     * Implement this to return a player in the game.
-     *
-     * @param id Id of the player
-     * @param BotIO ioHandler that handles IO.
-     * @return Object that is Subclass of AbstractPlayer
-     */
-    protected abstract Pl createPlayer(int id, BotIO ioHandler);
+    protected abstract Configuration getDefaultConfiguration();
 
     /**
      * Implement this to return the processor for the game.
-     *
      * @return Object that is Subclass of AbstractProcessor
      */
     protected abstract Pr createProcessor();
 
     /**
      * Implement this to return the GameLoop for the game.
-     *
      * @return Object that is Subclass of GameLoop
      */
-    protected abstract GameLoop createGameLoop();
+    protected abstract GameLoopInterface createGameLoop();
+
+    /**
+     * Implement this to return a player in the game.
+     * @param id Id of the player
+     * @return Object that is Subclass of AbstractPlayer
+     */
+    protected abstract Pl createPlayer(int id);
+
+    /**
+     * Send the settings to the player (bot) that are specific to this game
+     * @param player Player to send the game settings to
+     */
+    protected abstract void sendSettingsToPlayer(Pl player);
+
+    /**
+     * Implement this to return the initial (mostly empty) game state.
+     * @return The initial state of the game, should be Subclass of AbstractState
+     */
+    protected abstract S getInitialState();
 
     /**
      * Return the string representation of the entire game to use in
      * the visualizer
-     *
-     * @param initialState The initial state of the game (can be used
-     *                     to go the next game states).
+     * @param initialState The initial state of the game (can be used to go the next game states).
      * @return String representation of the entire game
      */
     protected abstract String getPlayedGame(S initialState);
