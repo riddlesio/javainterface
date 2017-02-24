@@ -1,5 +1,5 @@
 group 'io.riddles'
-version '1.0.2'
+version '1.0.5'
 
 apply plugin: 'groovy'
 apply plugin: 'java'
