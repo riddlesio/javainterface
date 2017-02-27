@@ -1,10 +1,10 @@
 group 'io.riddles'
-version '1.0.5'
+version '1.0.6'
 
 apply plugin: 'groovy'
 apply plugin: 'java'
 apply plugin: 'application'
-apply plugin: "jacoco"
+apply plugin: 'jacoco'
 
 sourceCompatibility = 1.8
 
