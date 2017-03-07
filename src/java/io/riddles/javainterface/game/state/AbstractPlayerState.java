@@ -21,18 +21,16 @@ package io.riddles.javainterface.game.state;
 
 import io.riddles.javainterface.game.player.PlayerBound;
 
-import java.util.ArrayList;
-
 /**
  * io.riddles.javainterface.engine.state.AbstractState - Created on 6-12-16
  *
  * [description]
  *
- * @author Josot de Meij - joost@riddles.io, Jim van Eeden - jim@riddles.io
+ * @author Joost - joost@riddles.io, Jim van Eeden - jim@riddles.io
  */
 public abstract class AbstractPlayerState<M> implements PlayerBound {
     private M move;
-    private int playerId;
+    protected int playerId;
 
     public AbstractPlayerState(int playerId) {
         this.playerId = playerId;
