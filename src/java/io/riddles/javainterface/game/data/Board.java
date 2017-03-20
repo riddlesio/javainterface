@@ -111,10 +111,10 @@ public abstract class Board<T> {
                      line += " ";
                 }
             }
-            System.out.println(line);
+            System.err.println(line);
         }
 
-        System.out.println();
+        System.err.println();
     }
 
     public T[][] getFields() {
@@ -132,8 +132,6 @@ public abstract class Board<T> {
     public int getHeight() {
         return this.height;
     }
-
-    public abstract void clear();
 
     public abstract T fieldFromString(String field);
 }
