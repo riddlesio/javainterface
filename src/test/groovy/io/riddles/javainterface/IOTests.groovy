@@ -84,7 +84,7 @@ class IOTests extends Specification {
         FileIOHandler testIOHandler = null;
 
         when:
-        testIOHandler = new FileIOHandler("./test/resources/not_empty.txt");
+        testIOHandler = new FileIOHandler("./src/test/resources/not_empty.txt");
         testIOHandler.getNextMessage();
 
         then:
@@ -97,7 +97,7 @@ class IOTests extends Specification {
         FileIOHandler testIOHandler = null;
 
         when:
-        testIOHandler = new FileIOHandler("./test/resources/not_empty.txt");
+        testIOHandler = new FileIOHandler("./src/test/resources/not_empty.txt");
         testIOHandler.sendWarning();
 
         then:
@@ -110,7 +110,7 @@ class IOTests extends Specification {
         FileIOHandler testIOHandler = null;
 
         when:
-        testIOHandler = new FileIOHandler("./test/resources/not_empty.txt");
+        testIOHandler = new FileIOHandler("./src/test/resources/not_empty.txt");
         testIOHandler.sendMessage();
 
         then:
@@ -123,7 +123,7 @@ class IOTests extends Specification {
         FileIOHandler testIOHandler = null;
 
         when:
-        testIOHandler = new FileIOHandler("./test/resources/empty.txt");
+        testIOHandler = new FileIOHandler("./src/test/resources/empty.txt");
         testIOHandler.getNextMessageFromFile();
 
         then:
@@ -136,7 +136,7 @@ class IOTests extends Specification {
         FileIOHandler testIOHandler = null;
 
         when:
-        testIOHandler = new FileIOHandler("./test/resources/not_empty.txt");
+        testIOHandler = new FileIOHandler("./src/test/resources/not_empty.txt");
         testIOHandler.sendRequest("hello");
 
         then:
@@ -149,7 +149,7 @@ class IOTests extends Specification {
         FileIOHandler testIOHandler = null;
 
         when:
-        testIOHandler = new FileIOHandler("./test/resources/empty.txt");
+        testIOHandler = new FileIOHandler("./src/test/resources/empty.txt");
         testIOHandler.sendRequest("hello");
 
         then:
@@ -162,7 +162,7 @@ class IOTests extends Specification {
         FileIOHandler testIOHandler = null;
 
         when:
-        testIOHandler = new FileIOHandler("./test/resources/empty.txt");
+        testIOHandler = new FileIOHandler("./src/test/resources/empty.txt");
         testIOHandler.waitForMessage("line 1");
 
         then:
@@ -174,7 +174,7 @@ class IOTests extends Specification {
         FileIOHandler testIOHandler = null;
 
         when:
-        testIOHandler = new FileIOHandler("./test/resources/not_empty.txt");
+        testIOHandler = new FileIOHandler("./src/test/resources/not_empty.txt");
         testIOHandler.waitForMessage("line 1");
 
         then:
