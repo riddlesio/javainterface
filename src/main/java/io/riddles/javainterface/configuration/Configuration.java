@@ -63,6 +63,11 @@ public class Configuration {
         this.values.put(key, configurationItem);
     }
 
+    public void put(String key, boolean value) {
+        ConfigurationItem configurationItem = new ConfigurationItem("double", value);
+        this.values.put(key, configurationItem);
+    }
+
     private ConfigurationItem get(String key) {
         ConfigurationItem item = this.values.get(key);
 
@@ -110,6 +115,18 @@ public class Configuration {
 
         try {
             return (double) item.getValue();
+        } catch (Exception ex) {
+            throw new ConfigurationException("Can't convert value to double.");
+        }
+    }
+
+
+    public boolean getBoolean(String key) {
+        ConfigurationItem item = get(key);
+        checkType(item, "double");
+
+        try {
+            return (boolean) item.getValue();
         } catch (Exception ex) {
             throw new ConfigurationException("Can't convert value to double.");
         }

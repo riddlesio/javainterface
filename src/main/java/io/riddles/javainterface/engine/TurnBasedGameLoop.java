@@ -62,6 +62,7 @@ public class TurnBasedGameLoop<S extends AbstractState> implements GameLoopInter
         LOGGER.info(String.format("Playing round %d", roundNumber));
 
         ArrayList<AbstractPlayerState> playerStates = state.getPlayerStates();
+        state.setRoundNumber(roundNumber);
 
         return playerStates.stream()
             .reduce(state, (S intermediateState, AbstractPlayerState playerState) -> {

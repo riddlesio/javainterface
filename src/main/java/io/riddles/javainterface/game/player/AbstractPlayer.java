@@ -146,6 +146,6 @@ public abstract class AbstractPlayer {
      * @return The bot's output
      */
     public String requestMove(Enum moveType) {
-        return this.ioHandler.sendRequest(String.format("action %s", moveType.toString()));
+        return this.ioHandler.sendRequest(String.format("action %s", moveType.toString().toLowerCase()));
     }
 }
