@@ -3,8 +3,7 @@ buildscript {
         maven {
             url 'http://artifactory.dev.riddles.io/artifactory/plugins-release'
             credentials {
-                username = "joost"
-                password = "5aT7UjyahqsUHBZx"
+                username = 'anonymous'
             }
         }
 
@@ -93,8 +92,7 @@ artifactory {
     publish {
         repository {
             repoKey = 'libs-release-local'
-            username = "joost"
-            password = "5aT7UjyahqsUHBZx"
+            username = 'anonymous'
             maven = true
 
         }
@@ -102,8 +100,7 @@ artifactory {
     resolve {
         repository {
             repoKey = 'libs-release'
-            username = "joost"
-            password = "5aT7UjyahqsUHBZx"
+            username = 'anonymous'
             maven = true
 
         }
