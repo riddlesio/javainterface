@@ -56,17 +56,17 @@ public abstract class Board<T> {
      * @return String
      */
     public String toString() {
-        String output = "";
+        StringBuilder output = new StringBuilder();
         String connector = "";
 
         for (int y = 0; y < this.height; y++) {
             for (int x = 0; x < this.width; x++) {
-                output += connector + this.fields[x][y];
+                output.append(connector).append(this.fields[x][y]);
                 connector = ",";
             }
         }
 
-        return output;
+        return output.toString();
     }
 
     public void setFieldsFromString(String input) {
@@ -103,14 +103,17 @@ public abstract class Board<T> {
         }
 
         for (int y = 0; y < this.height; y++) {  // dump the board
-            String line = "";
+            StringBuilder line = new StringBuilder();
+
             for (int x = 0; x < this.width; x++) {
                 String cell = this.fields[x][y] + "";
-                line += cell;
+                line.append(cell);
+
                 for (int i = 0; i <= maxLength - cell.length(); i++) {
-                     line += " ";
+                     line.append(" ");
                 }
             }
+
             System.err.println(line);
         }
 

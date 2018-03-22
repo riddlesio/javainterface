@@ -41,6 +41,9 @@ public abstract class AbstractPlayerState<M> implements PlayerBound {
         this.move = move;
     }
 
+    @Override
+    public abstract AbstractPlayerState clone();
+
     public void setMove(M move) {
         this.move = move;
     }

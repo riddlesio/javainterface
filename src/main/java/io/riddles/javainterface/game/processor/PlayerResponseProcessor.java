@@ -19,6 +19,7 @@
 
 package io.riddles.javainterface.game.processor;
 
+import io.riddles.javainterface.game.move.AbstractMove;
 import io.riddles.javainterface.game.player.AbstractPlayer;
 import io.riddles.javainterface.game.player.PlayerProvider;
 import io.riddles.javainterface.game.state.AbstractPlayerState;
@@ -32,7 +33,7 @@ import io.riddles.javainterface.io.PlayerResponse;
  *
  * @author Joost de Meij - joost@riddles.io, Jim van Eeden - jim@riddles.io
  */
-public abstract class PlayerResponseProcessor<S extends AbstractState, P extends AbstractPlayer> extends AbstractProcessor<S, P> {
+public abstract class PlayerResponseProcessor<S extends AbstractState, P extends AbstractPlayer> extends AbstractProcessor<S, P, AbstractMove> {
 
     public PlayerResponseProcessor(PlayerProvider<P> playerProvider) {
         super(playerProvider);

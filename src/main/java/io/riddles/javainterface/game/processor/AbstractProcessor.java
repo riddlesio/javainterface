@@ -19,6 +19,8 @@
 
 package io.riddles.javainterface.game.processor;
 
+import io.riddles.javainterface.game.move.AbstractMove;
+import io.riddles.javainterface.game.move.AbstractMoveDeserializer;
 import io.riddles.javainterface.game.player.AbstractPlayer;
 import io.riddles.javainterface.game.player.PlayerProvider;
 import io.riddles.javainterface.game.state.AbstractState;
@@ -36,12 +38,14 @@ import io.riddles.javainterface.game.state.AbstractState;
  *
  * @author Jim van Eeden - jim@riddles.io
  */
-public abstract class AbstractProcessor<S extends AbstractState, P extends AbstractPlayer> {
+public abstract class AbstractProcessor<S extends AbstractState, P extends AbstractPlayer, M extends AbstractMove> {
 
     protected PlayerProvider<P> playerProvider;
+    protected AbstractMoveDeserializer<M> moveDeserializer;
 
     protected AbstractProcessor(PlayerProvider<P> playerProvider) {
         this.playerProvider = playerProvider;
+        this.moveDeserializer = createMoveDeserializer();
     }
 
     /**
@@ -62,7 +66,22 @@ public abstract class AbstractProcessor<S extends AbstractState, P extends Abstr
      */
     public abstract double getScore(S state);
 
+    /**
+     * Create the move deserializer
+     * @return A MoveDeserializer
+     */
+    public abstract AbstractMoveDeserializer createMoveDeserializer();
+
     public PlayerProvider<P> getPlayerProvider() {
         return this.playerProvider;
+    }
+
+    protected M getPlayerMove(P player, Enum actionType) {
+        String response = player.requestMove(actionType);
+        return this.moveDeserializer.traverse(response);
+    }
+
+    protected P getPlayer(int id) {
+        return this.playerProvider.getPlayerById(id);
     }
 }

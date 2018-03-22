@@ -22,11 +22,14 @@ package io.riddles.javainterface.engine;
 import io.riddles.javainterface.configuration.Configuration;
 import io.riddles.javainterface.exception.TerminalException;
 
+import io.riddles.javainterface.game.AbstractGameSerializer;
 import io.riddles.javainterface.game.player.PlayerProvider;
 
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Logger;
@@ -35,6 +38,7 @@ import io.riddles.javainterface.game.player.AbstractPlayer;
 import io.riddles.javainterface.game.processor.AbstractProcessor;
 import io.riddles.javainterface.game.state.AbstractState;
 import io.riddles.javainterface.io.IOInterface;
+import io.riddles.javainterface.serialize.AbstractSerializer;
 
 /**
  * io.riddles.javainterface.engine.AbstractEngine - Created on 2-6-16
@@ -50,11 +54,11 @@ import io.riddles.javainterface.io.IOInterface;
  *
  * @author Jim van Eeden - jim@riddles.io
  */
-public abstract class AbstractEngine<Pr extends AbstractProcessor,
-        Pl extends AbstractPlayer, S extends AbstractState> {
+public abstract class AbstractEngine<Pr extends AbstractProcessor, Pl extends AbstractPlayer, S extends AbstractState> {
 
     protected final static Logger LOGGER = Logger.getLogger(AbstractEngine.class.getName());
 
+    public static SecureRandom random;
     public static Configuration configuration;
 
     protected IOInterface ioHandler;
@@ -62,7 +66,7 @@ public abstract class AbstractEngine<Pr extends AbstractProcessor,
     protected Pr processor;
     protected GameLoopInterface<Pr, S> gameLoop;
 
-    protected AbstractEngine(PlayerProvider<Pl> playerProvider, IOInterface ioHandler) throws TerminalException {
+    public AbstractEngine(PlayerProvider<Pl> playerProvider, IOInterface ioHandler) {
         this.playerProvider = playerProvider;
         this.gameLoop = createGameLoop();
 
@@ -83,13 +87,17 @@ public abstract class AbstractEngine<Pr extends AbstractProcessor,
         LOGGER.info("Got initialize. Parsing settings...");
         configuration = getDefaultConfiguration();
         parseInputUntilStart();
+        setRandomSeed();
 
         this.processor = createProcessor();
+        loadData();
 
         LOGGER.info("Got start. Sending game settings to bots...");
 
         sendSettingsToPlayers(this.playerProvider.getPlayers());
         LOGGER.info("Settings sent. Setting up engine done...");
+
+        initializeGame();
 
         return getInitialState();
 
@@ -115,6 +123,9 @@ public abstract class AbstractEngine<Pr extends AbstractProcessor,
      * @param finalState Last state of the game
      */
     public void didRun(S initialState, S finalState) {
+        AbstractGameSerializer serializer = createGameSerializer();
+        AbstractSerializer stateSerializer = createStateSerializer();
+
         // let the wrapper know the game has ended
         this.ioHandler.sendMessage("end");
 
@@ -127,7 +138,7 @@ public abstract class AbstractEngine<Pr extends AbstractProcessor,
         // send the game file
         this.ioHandler.waitForMessage("game");
 
-        String playedGame = getPlayedGame(initialState);
+        String playedGame = serializer.traverseToString(this.processor, initialState, stateSerializer);
         this.ioHandler.sendMessage(playedGame);
     }
 
@@ -182,6 +193,18 @@ public abstract class AbstractEngine<Pr extends AbstractProcessor,
         return details.toString();
     }
 
+    private void setRandomSeed() {
+        try {
+            random = SecureRandom.getInstance("SHA1PRNG");
+        } catch (NoSuchAlgorithmException ex) {
+            LOGGER.severe("Not able to use SHA1PRNG, using default algorithm");
+            random = new SecureRandom();
+        }
+        String seed = configuration.getString("seed");
+        LOGGER.info("RANDOM SEED IS: " + seed);
+        random.setSeed(seed.getBytes());
+    }
+
     /**
      * Send the settings to the player (bot) that are specific to this game
      * @param players Players to send the settings to
@@ -197,16 +220,24 @@ public abstract class AbstractEngine<Pr extends AbstractProcessor,
     protected abstract Configuration getDefaultConfiguration();
 
     /**
-     * Implement this to return the processor for the game.
-     * @return Object that is Subclass of AbstractProcessor
-     */
-    protected abstract Pr createProcessor();
-
-    /**
      * Implement this to return the GameLoop for the game.
      * @return Object that is Subclass of GameLoop
      */
     protected abstract GameLoopInterface createGameLoop();
+
+    /**
+     * Implement this with the game serializer so the engine can
+     * get the correct json output for the game.
+     * @return The game serializer for this game.
+     */
+    protected abstract AbstractGameSerializer createGameSerializer();
+
+    /**
+     * Implement this with the state serializer so the engine can
+     * serialize the game states
+     * @return The state serializer for this game
+     */
+    protected abstract AbstractSerializer createStateSerializer();
 
     /**
      * Implement this to return a player in the game.
@@ -216,24 +247,34 @@ public abstract class AbstractEngine<Pr extends AbstractProcessor,
     protected abstract Pl createPlayer(int id);
 
     /**
+     * Implement this to return the processor for the game.
+     * @return Object that is Subclass of AbstractProcessor
+     */
+    protected abstract Pr createProcessor();
+
+    /**
+     * Implement this method if the engine needs to load some
+     * data from a file before the game starts
+     */
+    protected abstract void loadData();
+
+    /**
      * Send the settings to the player (bot) that are specific to this game
      * @param player Player to send the game settings to
      */
     protected abstract void sendSettingsToPlayer(Pl player);
 
     /**
+     * Implement this method if the game needs initialize before
+     * creating the first state
+     */
+    protected abstract void initializeGame();
+
+    /**
      * Implement this to return the initial (mostly empty) game state.
      * @return The initial state of the game, should be Subclass of AbstractState
      */
     protected abstract S getInitialState();
-
-    /**
-     * Return the string representation of the entire game to use in
-     * the visualizer
-     * @param initialState The initial state of the game (can be used to go the next game states).
-     * @return String representation of the entire game
-     */
-    protected abstract String getPlayedGame(S initialState);
 
     /**
      * @return The players for the game

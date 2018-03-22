@@ -21,6 +21,7 @@ package io.riddles.javainterface.engine;
 
 import java.util.logging.Logger;
 
+import io.riddles.javainterface.game.move.AbstractMove;
 import io.riddles.javainterface.game.player.AbstractPlayer;
 import io.riddles.javainterface.game.processor.SimpleProcessor;
 import io.riddles.javainterface.game.state.AbstractState;

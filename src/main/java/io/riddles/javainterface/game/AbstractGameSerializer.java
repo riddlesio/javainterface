@@ -25,6 +25,7 @@ import org.json.JSONObject;
 import io.riddles.javainterface.game.player.AbstractPlayer;
 import io.riddles.javainterface.game.processor.AbstractProcessor;
 import io.riddles.javainterface.game.state.AbstractState;
+import io.riddles.javainterface.serialize.AbstractSerializer;
 
 /**
  * io.riddles.javainterface.game.state.AbstractGameSerializer - Created on 8-6-16
@@ -36,7 +37,7 @@ import io.riddles.javainterface.game.state.AbstractState;
  *
  * @author Jim van Eeden - jim@riddles.io
  */
-public abstract class AbstractGameSerializer<P extends AbstractProcessor, S extends AbstractState> {
+public abstract class AbstractGameSerializer<P extends AbstractProcessor, S extends AbstractState, R extends AbstractSerializer> {
 
     /**
      * Should return the complete game in a json string
@@ -44,18 +45,43 @@ public abstract class AbstractGameSerializer<P extends AbstractProcessor, S exte
      * @param initialState Initial state of the game
      * @return Complete game as a json string
      */
-    public abstract String traverseToString(P processor, S initialState);
+    public String traverseToString(P processor, S initialState, R stateSerializer) {
+        return visitGame(processor, initialState, stateSerializer).toString();
+    }
 
     /**
      * Method that can be used for (almost) every game type. Will put everything
-     * to the output file that every visualizer needs
-     * @param game JSONObject that stores the full game output
+     * to the output file that every visualizer needs. Override method if needed
      * @param processor Processor that is used this game
-     * @return Updated JSONObject with added stuff
+     * @param initialState Initial game state
+     * @param stateSerializer Serializer for the game states
+     * @return Game JSON object
      */
-    protected JSONObject addDefaultJSON(AbstractState state, JSONObject game, P processor) {
+    protected JSONObject visitGame(P processor, S initialState, R stateSerializer) {
+        JSONObject game = new JSONObject();
 
-        // put default settings (player settings)
+        JSONArray states = new JSONArray();
+        S state = initialState;
+        states.put(stateSerializer.traverseToJson(state));
+        while (state.hasNextState()) {
+            state = (S) state.getNextState();
+            states.put(stateSerializer.traverseToJson(state));
+        }
+
+        game.put("settings", visitSettings(processor));
+        game.put("score", processor.getScore(state));
+        game.put("winner", visitWinner(processor, state));
+        game.put("states", states);
+
+        return game;
+    }
+
+    /**
+     * Gets the default settings, used for most games. Override if needed
+     * @param processor Game processor
+     * @return Settings JSON Object
+     */
+    protected JSONObject visitSettings(P processor) {
         JSONArray playerNames = new JSONArray();
         for (Object obj : processor.getPlayerProvider().getPlayers()) {
             AbstractPlayer player = (AbstractPlayer) obj;
@@ -69,23 +95,20 @@ public abstract class AbstractGameSerializer<P extends AbstractProcessor, S exte
         JSONObject settings = new JSONObject();
         settings.put("players", players);
 
-        game.put("settings", settings);
+        return settings;
+    }
 
-        // Fast forward to last state
-        AbstractState finalState = state;
-        while (finalState.hasNextState()) {
-            finalState = finalState.getNextState();
-        }
-
+    /**
+     * Gets the game winner
+     * @param processor Game processor
+     * @param finalState Final state in the game
+     * @return Winner ID or a NULL JSON object
+     */
+    protected Object visitWinner(P processor, S finalState) {
         if (processor.getWinnerId(finalState) != null) {
-            game.put("winner", processor.getWinnerId(finalState));
-        } else {
-            game.put("winner", JSONObject.NULL);
+            return processor.getWinnerId(finalState);
         }
 
-        // put score
-        game.put("score", processor.getScore(finalState));
-
-        return game;
+        return JSONObject.NULL;
     }
 }

@@ -19,6 +19,7 @@
 
 package io.riddles.javainterface.engine;
 
+import io.riddles.javainterface.game.move.AbstractMove;
 import io.riddles.javainterface.game.player.AbstractPlayer;
 import io.riddles.javainterface.game.player.PlayerProvider;
 import io.riddles.javainterface.game.processor.AbstractProcessor;

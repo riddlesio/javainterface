@@ -94,6 +94,15 @@ public abstract class AbstractPlayer {
     }
 
     /**
+     * Send one setting to the player
+     * @param type Setting type
+     * @param value Setting value
+     */
+    public void sendSetting(String type, double value) {
+        this.ioHandler.sendMessage(String.format("settings %s %s", type, value));
+    }
+
+    /**
      * Sends one update to the player about another player or himself
      * @param type Type of update
      * @param player What player the update is about
@@ -111,6 +120,16 @@ public abstract class AbstractPlayer {
      */
     public void sendUpdate(String type, AbstractPlayer player, int value) {
         this.ioHandler.sendMessage(String.format("update %s %s %d", player.getName(), type, value));
+    }
+
+    /**
+     * Sends one update to the player about another player or himself
+     * @param type Type of update
+     * @param player What player the update is about
+     * @param value Value of the update
+     */
+    public void sendUpdate(String type, AbstractPlayer player, double value) {
+        this.ioHandler.sendMessage(String.format("update %s %s %s", player.getName(), type, value));
     }
 
     /**
@@ -132,6 +151,15 @@ public abstract class AbstractPlayer {
     }
 
     /**
+     * Sends one update to the player about the game in general, like round number
+     * @param type Type of update
+     * @param value Value of the update
+     */
+    public void sendUpdate(String type, double value) {
+        this.ioHandler.sendMessage(String.format("update game %s %s", type, value));
+    }
+
+    /**
      * Send a warning about the engine to the player that will
      * be logged in the dump.
      * @param warning Warning to be logged
@@ -142,10 +170,10 @@ public abstract class AbstractPlayer {
 
     /**
      * Asks the bot for given move type and returns the answer
-     * @param moveType Type of move the bot has to return
+     * @param actionType Type of move the bot has to return
      * @return The bot's output
      */
-    public String requestMove(Enum moveType) {
-        return this.ioHandler.sendRequest(String.format("action %s", moveType.toString().toLowerCase()));
+    public String requestMove(Enum actionType) {
+        return this.ioHandler.sendRequest(String.format("action %s", actionType.toString().toLowerCase()));
     }
 }

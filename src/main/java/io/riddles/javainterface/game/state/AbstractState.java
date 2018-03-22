@@ -21,6 +21,7 @@ package io.riddles.javainterface.game.state;
 
 
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 /**
  * io.riddles.javainterface.engine.state.AbstractState - Created on 3-6-16
@@ -65,32 +66,12 @@ public abstract class AbstractState<Ps extends AbstractPlayerState> {
         }
     }
 
-    /**
-     * @return The state before this one
-     */
-    public AbstractState getPreviousState() {
-        return this.previousState;
-    }
+    public abstract AbstractState createNextState(int roundNumber);
 
-    /**
-     * @return The state after this one
-     */
-    public AbstractState getNextState() {
-        return this.nextState;
-    }
-
-    /**
-     * @return The round number for this state
-     */
-    public int getRoundNumber() {
-        return this.roundNumber;
-    }
-
-    /**
-     * @return The playerStates in this state
-     */
-    public ArrayList<Ps> getPlayerStates() {
-        return this.playerStates;
+    protected ArrayList<Ps> clonePlayerStates() {
+        return getPlayerStates().stream()
+                .map(playerState -> (Ps) playerState.clone())
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 
     /**
@@ -108,6 +89,50 @@ public abstract class AbstractState<Ps extends AbstractPlayerState> {
     }
 
     /**
+     * @return The state before this one
+     */
+    public AbstractState getPreviousState() {
+        return this.previousState;
+    }
+
+    /**
+     * @return The state after this one
+     */
+    public AbstractState getNextState() {
+        return this.nextState;
+    }
+
+    /**
+     * Sets this state's round number
+     * @param roundNumber This state's round number
+     */
+    public void setRoundNumber(int roundNumber) {
+        this.roundNumber = roundNumber;
+    }
+
+    /**
+     * @return The round number for this state
+     */
+    public int getRoundNumber() {
+        return this.roundNumber;
+    }
+
+    /**
+     * Sets this state's player states
+     * @param playerStates PlayerStates for this state
+     */
+    public void setPlayerstates(ArrayList<Ps> playerStates) {
+        this.playerStates = playerStates;
+    }
+
+    /**
+     * @return The playerStates in this state
+     */
+    public ArrayList<Ps> getPlayerStates() {
+        return this.playerStates;
+    }
+
+    /**
      * @return True if there is a next state, false otherwise
      */
     public boolean hasNextState() {
@@ -119,13 +144,5 @@ public abstract class AbstractState<Ps extends AbstractPlayerState> {
      */
     public boolean hasPreviousState() {
         return this.previousState != null;
-    }
-
-    public void setRoundNumber(int roundNumber) {
-        this.roundNumber = roundNumber;
-    }
-
-    public void setPlayerstates(ArrayList<Ps> playerStates) {
-        this.playerStates = playerStates;
     }
 }
